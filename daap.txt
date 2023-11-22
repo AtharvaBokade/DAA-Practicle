@@ -1,0 +1,621 @@
+import java.util.Scanner;
+
+public class assg1 {
+
+    public static String multiply(String a, String b) {
+        int n = Math.max(a.length(), b.length());
+
+        // Pad 0's to make the lengths of 'a' and 'b' equal
+        while (a.length() < n)
+            a = '0' + a;
+
+        while (b.length() < n)
+            b = '0' + b;
+
+        if (n <= 1) {
+            // Base case: Single-digit multiplication
+            int result = (a.charAt(0) - '0') * (b.charAt(0) - '0');
+            return Integer.toString(result);
+        }
+
+        int mid = n / 2;
+
+        // Divide 'a' and 'b' into two parts
+        String a1 = a.substring(0, mid);
+        String a2 = a.substring(mid);
+        String b1 = b.substring(0, mid);
+        String b2 = b.substring(mid);
+
+        // Recursively compute sub-products
+        String A = multiply(a1, b1);
+        String B = multiply(a2, b1);
+        String C = multiply(a1, b2);
+        String D = multiply(a2, b2);
+
+        // Combine sub-products to get the final result
+        String firstTerm = A + "0".repeat(2 * (n - mid));
+        String secondTerm = add(B, C) + "0".repeat(n - mid);
+        String result = add(add(firstTerm, secondTerm), D);
+
+        return result;
+    }
+
+    public static String add(String a, String b) {
+        int carry = 0;
+        int n = Math.max(a.length(), b.length());
+        StringBuilder result = new StringBuilder();
+
+        while (a.length() < n)
+            a = '0' + a;
+
+        while (b.length() < n)
+            b = '0' + b;
+
+        for (int i = n - 1; i >= 0; i--) {
+            int sum = (a.charAt(i) - '0') + (b.charAt(i) - '0') + carry;
+            carry = sum / 10;
+            result.insert(0, sum % 10);
+        }
+
+        if (carry > 0)
+            result.insert(0, carry);
+
+        return result.toString();
+    }
+
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        String a = "";
+
+        System.out.println("Enter the numbers to be squared : ");
+        a = sc.nextLine();
+        String result = multiply(a, a);
+
+        System.out.println("Result square of the number is : " + result);
+    }
+}
+
+
+
+
+
+
+
+
+
+import java.util.*;
+public class assg2 {
+
+    public static void main(String[] args) {
+        try {
+            int n = readNumberOfJobs();
+            int[] job = new int[10];
+            int[] profit = new int[10];
+            int[] deadline = new int[10];
+
+            readJobDetails(n, job, profit, deadline);
+
+            sortProfit(profit, deadline, job, n);
+
+            displayJobDetails(n, job, profit, deadline);
+
+            int maxDeadline = findMaxDeadline(deadline, n);
+
+            int[] jobSequence = allocateJobs(maxDeadline, n, job, profit, deadline);
+
+            displayJobSequence(jobSequence, maxDeadline);
+
+        } catch (Exception e) {
+            System.out.println("An error occurred: " + e.getMessage());
+        }
+    }
+
+    private static int readNumberOfJobs() {
+        Scanner read = new Scanner(System.in);
+        System.out.print("No. of jobs - ");
+        return read.nextInt();
+    }
+
+    private static void readJobDetails(int n, int[] job, int[] profit, int[] deadline) {
+        Scanner read = new Scanner(System.in);
+        for (int i = 0; i < n; i++) {
+            job[i] = i + 1;
+            System.out.println("For Job no. " + (i + 1) + " :");
+            System.out.print("Profit- ");
+            profit[i] = read.nextInt();
+            System.out.print("Deadline- ");
+            deadline[i] = read.nextInt();
+            System.out.println();
+        }
+    }
+
+    private static void displayJobDetails(int n, int[] job, int[] profit, int[] deadline) {
+        System.out.print("Jobs : ");
+        for (int i = 0; i < n; i++) {
+            System.out.print(job[i] + " ");
+        }
+        System.out.println();
+        System.out.print("Profit : ");
+        for (int i = 0; i < n; i++) {
+            System.out.print(profit[i] + " ");
+        }
+        System.out.println();
+        System.out.print("Deadline : ");
+        for (int i = 0; i < n; i++) {
+            System.out.print(deadline[i] + " ");
+        }
+        System.out.println();
+    }
+
+    private static int findMaxDeadline(int[] deadline, int n) {
+        int maxDeadline = deadline[0];
+        for (int i = 0; i < n; i++) {
+            if (maxDeadline < deadline[i]) {
+                maxDeadline = deadline[i];
+            }
+        }
+        System.out.println("Max Deadline: " + maxDeadline);
+        return maxDeadline;
+    }
+
+    private static int[] allocateJobs(int maxDeadline, int n, int[] job, int[] profit, int[] deadline) {
+        int[] x = new int[maxDeadline];
+        int totalProfit = 0;
+        for (int i = 0; i < n; i++) {
+            int pp = deadline[i];
+            pp = pp - 1;
+            if (x[pp] == 0) {
+                x[pp] = job[i];
+                totalProfit += profit[i];
+            } else {
+                while (pp != -1) {
+                    if (x[pp] == 0) {
+                        x[pp] = job[i];
+                        totalProfit += profit[i];
+                        break;
+                    }
+                    pp = pp - 1;
+                }
+            }
+        }
+        System.out.println("Total Profit: " + totalProfit);
+        return x;
+    }
+
+    private static void displayJobSequence(int[] jobSequence, int maxDeadline) {
+        System.out.print("Job Sequence: ");
+        for (int i = 0; i < maxDeadline; i++) {
+            System.out.print(jobSequence[i]);
+            if (i < maxDeadline - 1) {
+                System.out.print(" --> ");
+            }
+        }
+        System.out.println();
+    }
+
+    private static void sortProfit(int profit[], int deadline[], int job[], int n) {
+        for (int i = 0; i < n; i++) {
+            int j = i;
+            int z = job[i];
+            int y = profit[i];
+            int x = deadline[i];
+            while ((j > 0) && (profit[j - 1] < y)) {
+                profit[j] = profit[j - 1];
+                deadline[j] = deadline[j - 1];
+                job[j] = job[j - 1];
+                j--;
+            }
+            job[j] = z;
+            profit[j] = y;
+            deadline[j] = x;
+        }
+    }
+}
+
+
+
+
+
+
+
+
+
+import java.util.*;
+public class assg3 {
+
+    static int infinity = Integer.MAX_VALUE;
+
+    static void print(int a[][], int n) {
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n; j++) {
+                if (a[i][j] == infinity)
+                    System.out.print("∞ ");
+                else
+                    System.out.print(a[i][j] + " ");
+            }
+            System.out.println();
+        }
+    }
+
+    public static void main(String args[]) {
+        try {
+            Scanner scan = new Scanner(System.in);
+
+            System.out.print("Enter the number of vertices: ");
+            int numberOfVertices = scan.nextInt();
+
+            int graphMatrix[][] = new int[numberOfVertices][numberOfVertices];
+
+            System.out.println("Enter the initial matrix values (for infinite value, enter -1):");
+            for (int i = 0; i < numberOfVertices; i++) {
+                for (int j = 0; j < numberOfVertices; j++) {
+                    System.out.print("Enter graph[" + i + "][" + j + "]: ");
+                    int test = scan.nextInt();
+                    if (test == -1)
+                        graphMatrix[i][j] = infinity;
+                    else
+                        graphMatrix[i][j] = test;
+                }
+            }
+
+            System.out.println("\nA0 matrix:\n");
+            print(graphMatrix, numberOfVertices);
+
+            for (int k = 0; k < numberOfVertices; k++) {
+                for (int i = 0; i < numberOfVertices; i++) {
+                    for (int j = 0; j < numberOfVertices; j++) {
+                        if (graphMatrix[i][k] != infinity && graphMatrix[k][j] != infinity) {
+                            graphMatrix[i][j] = Math.min(graphMatrix[i][j], graphMatrix[i][k] + graphMatrix[k][j]);
+                        }
+                    }
+                }
+                System.out.println("\nA" + k + " matrix:");
+                print(graphMatrix, numberOfVertices);
+            }
+
+            System.out.println("Final Matrix A:" + numberOfVertices + " :\n");
+            print(graphMatrix, numberOfVertices);
+
+        } catch (Exception e) {
+            System.out.println("An error occurred: " + e.getMessage());
+        }
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+import java.util.*;
+public class assg4 {
+
+    int minimumDistance(int distance[], int vertex, boolean spSet[]) {
+        int minDistance = Integer.MAX_VALUE;
+        int minIndex = -1;
+        for (int vx = 0; vx < vertex; vx++) {
+            if (!spSet[vx] && distance[vx] <= minDistance) {
+                minDistance = distance[vx];
+                minIndex = vx;
+            }
+        }
+        return minIndex;
+    }
+
+    void printSolution(int distance[], int n) {
+        System.out.println("The shortest Distance from source 0th node to all other nodes are: ");
+        for (int j = 0; j < n; j++) {
+            System.out.print("To " + j + " the shortest distance is: ");
+            if (distance[j] == Integer.MAX_VALUE) {
+                System.out.println("∞");
+            } else {
+                System.out.println(distance[j]);
+            }
+        }
+    }
+
+    void dij(int graph[][], int vertex, int s) {
+        int distance[] = new int[vertex];
+        boolean spSet[] = new boolean[vertex];
+        for (int j = 0; j < vertex; j++) {
+            distance[j] = Integer.MAX_VALUE;
+            spSet[j] = false;
+        }
+        distance[s] = 0;
+
+        for (int cnt = 0; cnt < vertex - 1; cnt++) {
+            int ux = minimumDistance(distance, vertex, spSet);
+            spSet[ux] = true;
+
+            for (int vx = 0; vx < vertex; vx++) {
+                if (!spSet[vx] && graph[ux][vx] != -1 && distance[ux] != Integer.MAX_VALUE
+                        && distance[ux] + graph[ux][vx] < distance[vx]) {
+                    distance[vx] = distance[ux] + graph[ux][vx];
+                }
+            }
+        }
+        printSolution(distance, vertex);
+    }
+
+    public static void main(String argvs[]) {
+        try {
+            Scanner sc = new Scanner(System.in);
+            int n;
+
+            System.out.print("Enter the number of nodes in the graph: ");
+            n = sc.nextInt();
+
+            int graph[][] = new int[n][n];
+            System.out.println("Enter the graph (use -1 for infinity):");
+
+            for (int i = 0; i < n; i++) {
+                for (int j = 0; j < n; j++) {
+                    System.out.print("graph[" + i + "][" + j + "]: ");
+                    int value = sc.nextInt();
+                    graph[i][j] = (value == -1) ? Integer.MAX_VALUE : value;
+                }
+            }
+
+            int source;
+            System.out.print("\nEnter source node: ");
+            source = sc.nextInt();
+
+            assg4 obj = new assg4();
+            obj.dij(graph, n, source);
+            sc.close();
+        } catch (Exception e) {
+            System.out.println("An error occurred: " + e.getMessage());
+        }
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+class KnightTour {
+    static int N = 8;
+
+    /* A utility function to check if i,j are 
+       valid indexes for N*N chessboard */
+    static boolean isSafe(int x, int y, int sol[][])
+    {
+        return (x >= 0 && x < N && y >= 0 && y < N
+                && sol[x][y] == -1);
+    }
+
+    /* A utility function to print solution 
+       matrix sol[N][N] */
+    static void printSolution(int sol[][])
+    {
+        for (int x = 0; x < N; x++) {
+            for (int y = 0; y < N; y++)
+                System.out.print(sol[x][y] + " ");
+            System.out.println();
+        }
+    }
+
+    /* This function solves the Knight Tour problem 
+       using Backtracking.  This  function mainly 
+       uses solveKTUtil() to solve the problem. It 
+       returns false if no complete tour is possible, 
+       otherwise return true and prints the tour. 
+       Please note that there may be more than one 
+       solutions, this function prints one of the 
+       feasible solutions.  */
+    static boolean solveKT()
+    {
+        int sol[][] = new int[8][8];
+
+        /* Initialization of solution matrix */
+        for (int x = 0; x < N; x++)
+            for (int y = 0; y < N; y++)
+                sol[x][y] = -1; 
+  
+        /* xMove[] and yMove[] define next move of Knight.
+           xMove[] is for next value of x coordinate
+           yMove[] is for next value of y coordinate */
+        int xMove[] = { 2, 1, -1, -2, -2, -1, 1, 2 };
+        int yMove[] = { 1, 2, 2, 1, -1, -2, -2, -1 };
+
+        // Since the Knight is initially at the first block 
+        sol[0][0] = 0; 
+  
+        /* Start from 0,0 and explore all tours using 
+           solveKTUtil() */
+        if (!solveKTUtil(0, 0, 1, sol, xMove, yMove)) {
+            System.out.println("Solution does not exist");
+            return false;
+        }
+        else
+            printSolution(sol);
+
+        return true;
+    }
+
+    /* A recursive utility function to solve Knight 
+       Tour problem */
+    static boolean solveKTUtil(int x, int y, int movei,
+                               int sol[][], int xMove[],
+                               int yMove[])
+    {
+        int k, next_x, next_y;
+        if (movei == N * N)
+            return true; 
+  
+        /* Try all next moves from the current coordinate 
+            x, y */
+        for (k = 0; k < 8; k++) {
+            next_x = x + xMove[k];
+            next_y = y + yMove[k];
+            if (isSafe(next_x, next_y, sol)) {
+                sol[next_x][next_y] = movei;
+                if (solveKTUtil(next_x, next_y, movei + 1,
+                        sol, xMove, yMove))
+                    return true;
+                else
+                    sol[next_x][next_y]
+                            = -1; // backtracking
+            }
+        }
+
+        return false;
+    }
+
+    /* Driver Code */
+    public static void main(String args[])
+    {
+        // Function Call 
+        solveKT();
+    }
+} 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+import java.util.PriorityQueue;
+import java.util.Comparator;
+import java.util.Scanner;
+public class assg6 {
+    static int N;
+    static int[][] costMatrix;
+
+    static class AssignmentNode {
+        int student;
+        int club;
+        int cost;
+        AssignmentNode parent;
+
+        AssignmentNode(int student, int club, int cost, AssignmentNode parent) {
+            this.student = student;
+            this.club = club;
+            this.cost = cost;
+            this.parent = parent;
+        }
+    }
+
+    public static void main(String[] args) {
+        try {
+            takeInput();
+            branchAndBound();
+        } catch (Exception e) {
+            System.out.println("Error: " + e.getMessage());
+        }
+    }
+
+    private static void takeInput() {
+        Scanner scanner = new Scanner(System.in);
+
+        try {
+            System.out.print("Enter the number of students and clubs (N): ");
+            N = scanner.nextInt();
+
+            if (N <= 0) {
+                throw new IllegalArgumentException("Number of students and clubs should be greater than 0.");
+            }
+
+            costMatrix = new int[N][N];
+
+            System.out.println("Enter the cost matrix:");
+
+            for (int i = 0; i < N; i++) {
+                for (int j = 0; j < N; j++) {
+                    System.out.print("Cost for student " + i + " and club " + j + ": ");
+                    costMatrix[i][j] = scanner.nextInt();
+                }
+            }
+        } finally {
+            scanner.close();
+        }
+    }
+
+    private static void branchAndBound() {
+        AssignmentNode root = new AssignmentNode(-1, -1, 0, null);
+        int minCost = Integer.MAX_VALUE;
+        AssignmentNode minCostNode = null;
+
+        for (int i = 0; i < N; i++) {
+            AssignmentNode child = new AssignmentNode(0, i, costMatrix[0][i], root);
+            minCostNode = branchAndBoundUtil(child, 1, minCost, minCostNode);
+        }
+
+        printSolution(minCostNode);
+    }
+
+    private static AssignmentNode branchAndBoundUtil(AssignmentNode node, int level, int minCost, AssignmentNode minCostNode) {
+        if (level == N) {
+            if (node.cost < minCost) {
+                minCost = node.cost;
+                minCostNode = node;
+            }
+            return minCostNode;
+        }
+
+        for (int i = 0; i < N; i++) {
+            if (!isAssigned(node, i)) {
+                AssignmentNode child = new AssignmentNode(level, i, node.cost + costMatrix[level][i], node);
+
+                if (child.cost < minCost) {
+                    minCostNode = branchAndBoundUtil(child, level + 1, minCost, minCostNode);
+                }
+            }
+        }
+
+        return minCostNode;
+    }
+
+    private static boolean isAssigned(AssignmentNode node, int club) {
+        while (node != null) {
+            if (node.club == club) {
+                return true;
+            }
+            node = node.parent;
+        }
+        return false;
+    }
+
+    private static void printSolution(AssignmentNode minCostNode) {
+        if (minCostNode == null) {
+            System.out.println("No valid assignment found.");
+            return;
+        }
+
+        System.out.println("Optimal Cost: " + minCostNode.cost);
+        System.out.println("Assignment:");
+
+        for (int i = N - 1; i >= 0; i--) {
+            System.out.println("Assign Student " + minCostNode.student + " to Club " + minCostNode.club);
+            minCostNode = minCostNode.parent;
+        }
+    }
+}
+s
